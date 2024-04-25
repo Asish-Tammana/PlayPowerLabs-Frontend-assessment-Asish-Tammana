@@ -12,3 +12,10 @@
 .slider{
     position: relative;
 }
+
+.close-icon{
+    align-self: flex-end;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+}

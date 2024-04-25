@@ -8,7 +8,17 @@ function App() {
   const [IST, setIST] = useState(['', 0]);
   const [PT, setPT] = useState(['', 0]);
   const [EDT, setEDT] = useState(['', 0]);
+  const [displayStatus, setDisplayStatus] = useState({ UTC: true, IST: true, PT: true, EDT: true });
   const [isInternalChange, setIsInternalChange] = useState(true);
+
+  const removeTime = (title) => {
+
+    setDisplayStatus(prevState => ({
+      ...prevState,
+      [title]: false
+    }));
+
+  }
 
   const calculateAngle = (timeString) => {
     const [hours, minutes] = timeString.split(':').map(Number);
@@ -79,14 +89,14 @@ function App() {
     const hours = parseInt(givenAngle / 15)
     const minutes = (givenAngle / 0.25) % 60
 
-    return {hours, minutes}
+    return { hours, minutes }
   }
 
   const ISTChanged = (angle) => {
     // const updatedAngle = calculateAngle(event)
 
-    const {hours, minutes} = get24hrsFromAngle(angle)
-    
+    const { hours, minutes } = get24hrsFromAngle(angle)
+
     const format24 = `${hours}:${minutes}`
 
     setIST([convert24hrTo12hr(format24), angle])
@@ -96,7 +106,7 @@ function App() {
     const utcFormat12 = convert24hrTo12hr(utcFormat24);
 
     setTimeout(() => {
-      setUTC([utcFormat12,utcAngle])
+      setUTC([utcFormat12, utcAngle])
     }, 1000)
     setIsInternalChange(true);
 
@@ -105,13 +115,13 @@ function App() {
 
   const PTChanged = (angle) => {
 
-    const {hours, minutes} = get24hrsFromAngle(angle)
-    
+    const { hours, minutes } = get24hrsFromAngle(angle)
+
     const format24 = `${hours}:${minutes}`
     const utcFormat24 = addHoursMinutesToTime(format24, 7, 0)
     const utcAngle = calculateAngle(utcFormat24)
     const utcFormat12 = convert24hrTo12hr(utcFormat24);
-    
+
     setTimeout(() => {
       setUTC([utcFormat12, utcAngle])
     }, 1000)
@@ -121,8 +131,8 @@ function App() {
 
   const EDTChanged = (angle) => {
     // setEDT(event)
-    const {hours, minutes} = get24hrsFromAngle(angle)
-    
+    const { hours, minutes } = get24hrsFromAngle(angle)
+
     const format24 = `${hours}:${minutes}`
     const utcFormat24 = addHoursMinutesToTime(format24, 4, 0)
     const utcAngle = calculateAngle(utcFormat24)
@@ -135,13 +145,13 @@ function App() {
   }
 
   const UTCChanged = (angle) => {
-    const {hours, minutes} = get24hrsFromAngle(angle)
+    const { hours, minutes } = get24hrsFromAngle(angle)
     const format24 = `${hours}:${minutes}`
     setUTC([convert24hrTo12hr(format24), angle])
   }
 
   const changeRemainingTime = () => {
-    
+
     let updatedIST = addHoursMinutesToTime(convert12hrTo24hr(UTC[0]), 5, 30)
     let updatedISTAngle = calculateAngle(updatedIST)
     setIST([convert24hrTo12hr(updatedIST), updatedISTAngle])
@@ -154,25 +164,32 @@ function App() {
     let updatedEDTAngle = calculateAngle(updatedEDT)
     setEDT([convert24hrTo12hr(updatedEDT), updatedEDTAngle])
     setIsInternalChange(false);
-    
+
 
 
   }
 
-  useEffect(()=>{
-    if(isInternalChange){
+  useEffect(() => {
+    if (isInternalChange) {
       changeRemainingTime();
     }
-  } , [UTC])
-  
+  }, [UTC])
+
 
   return (
-    <div className='time-box'>
-      <TimeComp timezone={UTC} changeTime={UTCChanged} title="UTC" />
-      <TimeComp timezone={IST} changeTime={ISTChanged} title="IST" />
-      <TimeComp timezone={EDT} changeTime={EDTChanged} title="EDT" />
-      <TimeComp timezone={PT} changeTime={PTChanged} title="PT" />
+    <div>
+      <div className='title-container'>
+        <h1>Time Zone Converter: Simplify Global Time Management</h1>
+      </div>
+      <div className='time-box'>
+        {displayStatus.UTC && <TimeComp timezone={UTC} changeTime={UTCChanged} title="UTC" removeTime={removeTime} />}
+        {displayStatus.IST && <TimeComp timezone={IST} changeTime={ISTChanged} title="IST" removeTime={removeTime} />}
+        {displayStatus.EDT && <TimeComp timezone={EDT} changeTime={EDTChanged} title="EDT" removeTime={removeTime} />}
+        {displayStatus.PT && <TimeComp timezone={PT} changeTime={PTChanged} title="PT" removeTime={removeTime} />}
+      </div>
+
     </div>
+
   );
 }
 
